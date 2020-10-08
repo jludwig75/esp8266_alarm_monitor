@@ -6,7 +6,8 @@
 #include "twilio.hpp"
 #include "config.h"
 
-
+namespace
+{
 // Find the api.twilio.com SHA1 fingerprint, this one was valid as 
 // of July 2020. This will change, please see 
 // https://www.twilio.com/docs/sms/tutorials/how-to-send-sms-messages-esp8266-cpp
@@ -28,7 +29,9 @@ const char* auth_token = TWILIO_AUTH_TOKEN;
 String from_number = "+13852637908";
 
 // Global twilio objects
-Twilio twilio(account_sid, auth_token, fingerprint);    
+Twilio twilio(account_sid, auth_token, fingerprint);
+
+} // namespace
 
 void sms_begin()
 {

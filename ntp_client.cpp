@@ -3,39 +3,17 @@
 #include <ESP8266WiFi.h>
 #include <WiFiUdp.h>
 
+namespace
+{
 
 // NTP Servers:
-static const char ntpServerName[] = "us.pool.ntp.org";
-//static const char ntpServerName[] = "time.nist.gov";
-//static const char ntpServerName[] = "time-a.timefreq.bldrdoc.gov";
-//static const char ntpServerName[] = "time-b.timefreq.bldrdoc.gov";
-//static const char ntpServerName[] = "time-c.timefreq.bldrdoc.gov";
-
-NtpClient::NtpClient() : m_udp(NULL)
-{
-}
-
-NtpClient::~NtpClient()
-{
-	delete m_udp;
-}
-
-void NtpClient::begin(uint16_t udp_listen_port)
-{
-	m_udp = new WiFiUDP;
-	Serial.println("Starting UDP");
-	m_udp->begin(udp_listen_port);
-	Serial.print("Local NTP UDP port: ");
-	Serial.println(m_udp->localPort());
-}
+const char ntpServerName[] = "us.pool.ntp.org";
+//const char ntpServerName[] = "time.nist.gov";
+//const char ntpServerName[] = "time-a.timefreq.bldrdoc.gov";
+//const char ntpServerName[] = "time-b.timefreq.bldrdoc.gov";
+//const char ntpServerName[] = "time-c.timefreq.bldrdoc.gov";
 
 time_t getNtpTime(WiFiUDP & udp);
-
-time_t NtpClient::get_time() const
-{
-	return getNtpTime((WiFiUDP &)*m_udp);
-}
-
 /*-------- NTP code ----------*/
 
 const int NTP_PACKET_SIZE = 48; // NTP time is in the first 48 bytes of message
@@ -96,3 +74,29 @@ void sendNTPpacket(WiFiUDP & udp, IPAddress &address)
 	udp.write(packetBuffer, NTP_PACKET_SIZE);
 	udp.endPacket();
 }
+
+} // namespace
+
+NtpClient::NtpClient() : m_udp(NULL)
+{
+}
+
+NtpClient::~NtpClient()
+{
+	delete m_udp;
+}
+
+void NtpClient::begin(uint16_t udp_listen_port)
+{
+	m_udp = new WiFiUDP;
+	Serial.println("Starting UDP");
+	m_udp->begin(udp_listen_port);
+	Serial.print("Local NTP UDP port: ");
+	Serial.println(m_udp->localPort());
+}
+
+time_t NtpClient::get_time() const
+{
+	return getNtpTime((WiFiUDP &)*m_udp);
+}
+

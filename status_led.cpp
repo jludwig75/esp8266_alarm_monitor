@@ -3,8 +3,15 @@
 #include <Arduino.h>
 
 
-static int led_pin_number = __INT16_MAX__;
+namespace
+{
 
+int led_pin_number = __INT16_MAX__;
+
+unsigned long previousTime = millis();
+const unsigned long interval = 500;
+
+}
 
 void status_led_begin(int pin_number)
 {
@@ -12,9 +19,6 @@ void status_led_begin(int pin_number)
     pinMode(led_pin_number, OUTPUT);
     digitalWrite(led_pin_number, 1);
 }
-
-static unsigned long previousTime = millis();
-static const unsigned long interval = 500;
 
 void status_led_on_loop()
 {

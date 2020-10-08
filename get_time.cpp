@@ -5,10 +5,15 @@
 #include "ntp_client.h"
 
 
+namespace
+{
+
 NtpClient ntp;
 TimeChangeRule myDST = { "MDT", Second, Sun, Mar, 2, -6 * 60 };    //Daylight time = UTC - 6 hours
 TimeChangeRule mySTD = { "MST", First, Sun, Nov, 2, -7 * 60 };     //Standard time = UTC - 7 hours
 Timezone tz(myDST, mySTD);
+
+} // namespace
 
 void get_time_begin()
 {
