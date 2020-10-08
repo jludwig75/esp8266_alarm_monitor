@@ -1,7 +1,5 @@
 #include "get_time.h"
 
-#include <Time.h>
-#include <TimeLib.h>
 #include <Timezone.h>
 
 #include "ntp_client.h"
