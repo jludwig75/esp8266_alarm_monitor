@@ -7,11 +7,10 @@
 #include "ota.h"
 #include "sms.h"
 #include "get_time.h"
+#include "status_led.h"
 #include "config.h"
 
 Wifi wifi;
-
-const byte led = LED_BUILTIN;
 
 //#define TEST_MODE
 
@@ -45,37 +44,21 @@ void setup()
     ota_setup();
     sms_begin();
     get_time_begin();
-
-    pinMode(led, OUTPUT);
-    digitalWrite(led, 1);
+    status_led_begin(LED_BUILTIN);
 
     // Enable an external interrupt on the alarm sounder line
     pinMode(ALARM_PIN, INPUT_PULLUP);
     attachInterrupt(digitalPinToInterrupt(ALARM_PIN), onAlarm, ALARM_LOGIC_CHANGE);
 }
 
-unsigned long previousTime = millis();
-
-const unsigned long interval = 500;
-
 void loop()
 {
     ota_on_loop();
-    unsigned long diff = millis() - previousTime;
-    if(diff > interval)
-    {
-        digitalWrite(led, !digitalRead(led));  // Change the state of the LED
-        previousTime += diff;
-
-        if (digitalRead(led))
-        {
-            Serial.print("+");
-        }
-    }
+    status_led_on_loop();
 
     if (sendAlert)
     {
-        digitalWrite(led, LOW);
+        status_led_on();
 
         //unsigned short level = analogRead(A0);
 
@@ -89,6 +72,6 @@ void loop()
 
         sendAlert = false;
 
-        digitalWrite(led, HIGH);
+        status_led_off();
     }
 }
