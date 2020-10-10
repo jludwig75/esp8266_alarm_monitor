@@ -22,14 +22,14 @@ void Wifi::begin(const char* ssid, const char* password)
         delay(250);
         Serial.print('.');
     }
-    Serial.println('\n');
+    Serial.println("\n");
     _connected = true;
     _ssid = WiFi.SSID();
     _ip_address = WiFi.localIP();
     Serial.print("Connected to ");
     Serial.println(WiFi.SSID());              // Tell us what network we're connected to
     Serial.print("IP address:\t");
-    Serial.println(WiFi.localIP());           // Send the IP address of the ESP8266 to the computer
+    Serial.println(WiFi.localIP().toString());           // Send the IP address of the ESP8266 to the computer
 }
 
 
