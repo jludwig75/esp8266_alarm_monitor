@@ -11,7 +11,6 @@
 namespace
 {
 
-bool sendAlert = false;
 int alarmInterruptPin = __INT16_MAX__;
 
 struct InterruptEvent
@@ -22,27 +21,45 @@ struct InterruptEvent
 
 SimpleQueue<InterruptEvent, 1024> interruptEvents;
 
+unsigned long lastInterruptChangeTime = millis();
+int lastInterruptChange = FALLING;
+int lastInterruptLevel = LOW;
+const unsigned long minimumAlarmSoundingTimeMiliseconds = 500;
+const unsigned long minimumAlarmReportIntervalMiliseconds = 30 * 1000;
+
 ICACHE_RAM_ATTR void onAlarmInterrupt()
 {
-    if (digitalRead(alarmInterruptPin) == HIGH)
+    unsigned long interruptTime = millis();
+    int currentLevel = digitalRead(alarmInterruptPin);
+
+    noInterrupts();
+    if (currentLevel == HIGH)
     {
-        InterruptEvent evt;
-        evt.type = RISING;
-        evt.millis = millis();
-
-        interruptEvents.push(evt);
-
-        Serial.println("Alarm sounded!");
-        sendAlert = true;
+        if (lastInterruptLevel == LOW)
+        {
+            lastInterruptLevel = HIGH;
+            lastInterruptChange = RISING;
+            lastInterruptChangeTime = interruptTime;
+            InterruptEvent evt;
+            evt.type = 1;
+            evt.millis = interruptTime;
+            interruptEvents.push(evt);
+        }
     }
     else
     {
-        InterruptEvent evt;
-        evt.type = FALLING;
-        evt.millis = millis();
-
-        interruptEvents.push(evt);
+        if (lastInterruptLevel == HIGH)
+        {
+            lastInterruptLevel = LOW;
+            lastInterruptChange = FALLING;
+            lastInterruptChangeTime = interruptTime;
+            InterruptEvent evt;
+            evt.millis = interruptTime;
+            evt.type = 0;
+            interruptEvents.push(evt);
+        }
     }
+    interrupts();
 }
 
 void log_interrupt_event()
@@ -77,19 +94,25 @@ void alarm_monitor_begin(int alarm_monitor_pin)
     attachInterrupt(digitalPinToInterrupt(alarm_monitor_pin), onAlarmInterrupt, CHANGE);
 }
 
+unsigned long lastReportTime = millis() - minimumAlarmReportIntervalMiliseconds;
+
 void alarm_monitor_on_loop()
 {
-    if (sendAlert)
+    unsigned long now = millis();
+    if (lastInterruptChange == RISING &&
+        now - lastInterruptChangeTime >= minimumAlarmSoundingTimeMiliseconds &&
+        now - lastReportTime >= minimumAlarmReportIntervalMiliseconds)
     {
         status_led_on();
 
-        logger.log("Sending alert message...");
-        String message("You home alarm system was triggered at ");
+        logger.log(String("Sending alert message at ") + String(millis()) + "...");
+        String message("Your home alarm system was triggered at ");
         message += get_date_time_string();
         
-        send_sms("+18013600861", message.c_str());
-
-        sendAlert = false;
+        if (send_sms("+18013600861", message.c_str()))
+        {
+            lastReportTime = now;
+        }
 
         status_led_off();
     }

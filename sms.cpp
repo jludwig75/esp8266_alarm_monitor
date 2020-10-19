@@ -37,9 +37,8 @@ void sms_begin()
 {
 }
 
-void send_sms(const char* to_number, const char* message)
+bool send_sms(const char* to_number, const char* message)
 {
-// TODO: reenable this when ready:
-//    String response;
-//    bool success = twilio.send_message(to_number, from_number, message, response, "");
+    String response;
+    return twilio.send_message(to_number, from_number, message, response, "");
 }

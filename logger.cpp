@@ -45,15 +45,24 @@ void Logger::begin()
         return;
     }
 
-    // Serial.println("Formatting file system");
-    // if (!SPIFFS.format())
-    // {
-    //     Serial.println("Error formatting SPIFFS");
-    //     return;
-    // }
+   Serial.println("Checking for file system...");
+   FSInfo info;
+   if (!SPIFFS.info(info))
+   {
+       Serial.println("Formatting file system");
+       if (!SPIFFS.format())
+       {
+           Serial.println("Error formatting SPIFFS");
+           return;
+       }
+   }
+   else
+   {
+       Serial.println("File system already formatted.");
+   }
 
     Serial.println("Creating log file");
-    logFile = SPIFFS.open("/debug.log", "w");
+    logFile = SPIFFS.open("/debug.log", "a");
     if (!logFile)
     {
         Serial.println("Failed to create log file");
